@@ -61,3 +61,55 @@ Uses Prettier with:
 - Single quotes
 - 2-space indentation
 - Import sorting (third-party → @/ → relative)
+
+## Generated Files
+
+The following paths are auto-generated and must not be edited by hand:
+
+- `src/data/generated/` — JSON produced by `scripts/`
+- `src/pages/ensip/` — MDX produced by `scripts/ensips.ts`
+
+Generated files are committed to the repo as a cache to avoid network calls on every dev start.
+Delete these directories to force a re-fetch on the next `bun run generate`.
+
+## Validation
+
+There is no test suite. `bun run build` is the only correctness check — it runs TypeScript
+compilation and the full Vocs build. All TypeScript errors must be resolved before merging.
+Do not run `bun test`; it will fail.
+
+## MDX Conventions
+
+- **Frontmatter:** `title` is required. `description` is optional but recommended for SEO.
+- **Components:** import explicitly at the top of each MDX file from the relative path to `src/components/`.
+- **Callouts:** use GitHub-flavored admonition syntax supported by Vocs:
+  ```
+  > [!NOTE]
+  > [!WARNING]
+  > [!IMPORTANT]
+  ```
+- **Mermaid diagrams:** fenced code blocks with the `mermaid` language tag are rendered as diagrams.
+
+## Sidebar
+
+Defined in `vocs.config.tsx`. Two sections are injected from generated JSON at startup:
+
+- ENSIPs: `src/data/generated/ensips-sidebar.json`
+- DAO Proposals: `src/data/generated/dao-proposals-sidebar.json`
+
+To add a new documentation section, add an entry to the `sidebar` array in `vocs.config.tsx`
+and create the corresponding MDX files under `src/pages/`.
+
+## Cloudflare Pages Functions
+
+`functions/api/` contains:
+
+- `og.tsx` — generates OG images per page using `@cloudflare/pages-plugin-vercel-og`
+- `blah/event.ts`, `blah/script.ts` — analytics proxy to avoid ad-blocker interference
+- `example/basic-gateway.ts` — CCIP-read gateway example
+
+The Vocs dev server does not run Cloudflare Functions. For full function testing:
+
+```bash
+bun run build && bunx wrangler pages dev src/dist
+```
